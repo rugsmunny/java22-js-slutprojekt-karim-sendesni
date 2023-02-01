@@ -20,8 +20,6 @@ const pageSelectBtn = document.querySelectorAll('.page-select-btn'); // OM MÖJL
 document.querySelector('#submit-btn').addEventListener('click', fetchNewImages);
 pageSelectBtn.forEach(btn => btn.addEventListener('click', event => updatePageSelectContainer(event)));
 
-
-
 imgContainer.addEventListener('wheel', (event) => {
     event.preventDefault();
 
@@ -30,6 +28,7 @@ imgContainer.addEventListener('wheel', (event) => {
 
     });
 });
+
 function fetchRandomWord() {
 
     return fetch(randomWordURL).then( response => {
@@ -213,11 +212,7 @@ function createAnchorElement(){
 function createLabelElement(){
 
     const title = document.createElement('div');
-    const check = document.createElement('p');
-    check.innerText = 'X';
     title.setAttribute('class' ,  'img-title');
-    check.setAttribute('class' ,  'thumb');
-    title.append(check);
 
     return title;
 
@@ -275,58 +270,3 @@ function updatePageSelectContainer(event) {
 
 
 
-let links = [];
-
-imgContainer.on('click', '.thumb', function () {
-
-    $(this).removeClass().addClass('thumbChecked');
-    $(this).css("border", "2px solid #c32032");
-    links.push($(this).attr('src'));
-    console.log(links);
-
-    if (links.length !== 0) {
-        $('.download').css("display", "block");
-    }
-
-});
-
-
-imgContainer.on('click', '.thumbChecked', function () {
-
-    $(this).removeClass().addClass('thumb');
-    $(this).css("border", "2px solid white");
-    let itemtoRemove = $(this).attr('src');
-    links.splice($.inArray(itemtoRemove, links), 1);
-    console.log(links);
-
-    if (links.length === 0) {
-        $('.download').css("display", "none");
-    }
-
-});
-
-
-function generateZIP() {
-    console.log('TEST');
-    let zip = new JSZip();
-    let count = 0;
-    let zipFilename = "Pictures.zip";
-
-    links.forEach(function (url, i) {
-        let filename = links[i];
-        filename = filename.replace(/[\/\*\|\:\<\>\?\"\\]/gi, '').replace("https://live.staticflickr.com/","");
-        // loading a file and add it in a zip file
-        JSZipUtils.getBinaryContent(url, function (err, data) {
-            if (err) {
-                throw err; // or handle the error
-            }
-            zip.file(filename, data, { binary: true });
-            count++;
-            if (count == links.length) {
-                zip.generateAsync({ type: 'blob' }).then(function (content) {
-                    saveAs(content, zipFilename);
-                });
-            }
-        });
-    });
-}
