@@ -195,8 +195,8 @@ h3 {
 
 #background-video {
 
-    width: 140vw;
-    height: 140vh;
+    width: 100vw;
+    height: 100vh;
     object-fit: cover;
     position: fixed;
     left: 0;
