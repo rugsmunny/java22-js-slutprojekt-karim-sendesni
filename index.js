@@ -28,8 +28,7 @@ submitBtn.addEventListener('click', imageQuery );
 // Tvungen ha denna annars fungerar inte 'ENTER'
 document.body.addEventListener('keypress', ( event) => {
     if( event.key === 'Enter') { event.preventDefault(); submitBtn.click() } } );
-pageSelectContainerBtn.forEach(btn => btn.addEventListener('click', event =>
-    updatePageContainer( event ) ) );
+pageSelectContainerBtn.forEach(btn => btn.addEventListener('click', updatePageContainer ) );
 
 
 /***** FUNKTIONER SOM KALLAS PÅ VID SÖKNING ******/
@@ -154,7 +153,7 @@ async function fetchFlickrImages() {
 }
 
 
-async function createGalleryImages() {
+function createGalleryImages() {
 
     const imgCollector = new DocumentFragment();
 
@@ -164,12 +163,14 @@ async function createGalleryImages() {
 
     for (let i = firstImg; i < lastImg; i++) {
 
-        try {
-            if (flickrImgArray[i].id !== undefined
-                && flickrImgArray[i].server !== undefined
-                && flickrImgArray[i].secret !== undefined) {
+        const photoData = flickrImgArray[i];
 
-                const {id, server, secret, title} = flickrImgArray[i];
+        try {
+            if (photoData.id !== undefined
+                && photoData.server !== undefined
+                && photoData.secret !== undefined) {
+
+                const {id, server, secret, title} = photoData;
 
                 const img = createImgElement();
                 const anchorElement = createAnchor();
@@ -187,7 +188,7 @@ async function createGalleryImages() {
 
                 if (i == lastImg - 1) {
 
-                    card.append(await setEndToFinalCard());
+                    card.append( setEndToFinalCard() );
                 }
 
                 imgCollector.append(card);
@@ -215,29 +216,33 @@ async function createGalleryImages() {
         - '_b' -> XL img -> horisontellt galleri -> scroll i x-led
         - M och S img -> vertikalt galleri -> scroll i y-led
  */
+
+function scrollXAxis(event) {
+
+    event.preventDefault();
+
+    imgContainer.scrollBy({
+
+        left: event.deltaY < 0 ? -250 : 250,
+
+    });
+
+}
 function setGalleryLayout() {
 
     if ( imgSizeSuffix === '_b' ) {
 
-        imgContainer.classList.remove('gallery-vertical' )
+        imgContainer.classList.remove('gallery-vertical' );
         imgContainer.classList.add( 'gallery-horizontal' );
+        imgContainer.addEventListener('wheel', scrollXAxis );
 
-        imgContainer.addEventListener('wheel', ( event) => {
-            event.preventDefault();
-
-            imgContainer.scrollBy({
-
-                left: event.deltaY < 0 ? -250 : 250,
-
-            });
-
-        });
 
     } else {
 
+        imgContainer.removeEventListener('wheel', scrollXAxis );
         imgContainer.classList.remove('gallery-horizontal' )
         imgContainer.classList.add( 'gallery-vertical' );
-        imgContainer.removeEventListener('wheel', () => {} );
+
     }
 }
 
@@ -319,9 +324,11 @@ function updatePageContainer( event ) {
     if (event.target.matches('.page-select-btn' )) {
 
         currentPageNumber += parseInt( event.target.getAttribute('value' ));
-        createGalleryImages().then( () => {
-            pageSelectContainerBtn[1].style.display =
-                flickrImgArray.length <= ( imgQtyPerPage * currentPageNumber) ? 'none' : 'block';});
+        createGalleryImages();
+            pageSelectContainerBtn[1].style.display = flickrImgArray.length <=
+                ( document.querySelector('#number-of-images' ).value * currentPageNumber )
+                    ? 'none' : 'block';
+
 
     }
 
